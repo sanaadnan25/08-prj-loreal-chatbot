@@ -15,10 +15,17 @@
     <link rel="stylesheet" href="style.css" />
   </head>
 
-  <body>
+  <body> 
     <div class="page-wrapper">
       <!------- Header / Branding ------->
       <header class="site-header">
+        <!-- 
+          Troubleshooting logo:
+          1. Make sure 'loreal-logo.png' is in the SAME folder as 'index.html'.
+          2. Check the filename for typos, capitalization, and file extension (.png).
+          3. If you renamed the file, update the src attribute to match.
+        -->
+        <img src="loreal-logo.png" alt="L'Oréal Logo" style="height:48px; margin-bottom:12px;" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<div style=\'margin-bottom:12px; color:#666;\'>[Logo not found]</div>')">
         <h1 class="site-title">Smart Product Advisor</h1>
       </header>
 
