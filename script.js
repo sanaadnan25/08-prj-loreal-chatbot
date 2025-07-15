@@ -8,7 +8,11 @@ const SYSTEM_PROMPT =
   "You are a helpful assistant for L’Oréal. Only answer questions related to L’Oréal products, beauty routines, recommendations, or beauty-related topics. If asked anything unrelated, politely reply: 'Sorry, I can only help with L’Oréal products, routines, recommendations, and beauty-related topics.' If the user provides their name, remember it and use it in future responses.";
 
 // Store chat history as an array of messages
-let messages = [{ role: "system", content: SYSTEM_PROMPT }];
+// Add the assistant's hello message so it always shows as the first bubble
+let messages = [
+  { role: "system", content: SYSTEM_PROMPT },
+  { role: "assistant", content: "👋 Hello! How can I help you today?" }
+];
 
 // Variable to store user's name if provided
 let userName = "";
@@ -16,26 +20,9 @@ let userName = "";
 // Show initial message
 renderMessages();
 
-// Create or select the area for the latest question or start message
-let latestQuestionDiv = document.createElement("div");
-latestQuestionDiv.id = "latest-question";
-latestQuestionDiv.style.fontWeight = "600";
-latestQuestionDiv.style.fontSize = "1.1rem";
-latestQuestionDiv.style.margin = "18px 0 8px 0";
-latestQuestionDiv.style.color = "#C6A76D";
-latestQuestionDiv.style.textAlign = "left";
-const chatboxSection = document.querySelector(".chatbox");
-if (chatboxSection && !document.getElementById("latest-question")) {
-  chatboxSection.insertBefore(
-    latestQuestionDiv,
-    chatboxSection.firstChild.nextSibling
-  );
-}
-
 /**
  * Renders all messages in the chat window.
- * Shows a start message before the first user question.
- * The latest user question is shown above the AI response.
+ * Only chat bubbles are shown.
  */
 function renderMessages() {
   // Clear chat window
@@ -44,23 +31,7 @@ function renderMessages() {
   // Only show messages with role 'user' or 'assistant' (skip 'system')
   const visibleMessages = messages.filter((m) => m.role !== "system");
 
-  // Find the latest user question (last user message)
-  const lastUserMsg = [...visibleMessages]
-    .reverse()
-    .find((m) => m.role === "user");
-
-  // Show start message before first user question, then show latest question
-  if (latestQuestionDiv) {
-    if (!lastUserMsg) {
-      latestQuestionDiv.textContent = "👋 Hello! How can I help you today?";
-      latestQuestionDiv.style.display = "block";
-    } else {
-      latestQuestionDiv.textContent = lastUserMsg.content;
-      latestQuestionDiv.style.display = "block";
-    }
-  }
-
-  // Render all bubbles (no initial assistant bubble)
+  // Render all bubbles
   visibleMessages.forEach((msg, idx) => {
     const total = visibleMessages.length;
     const scale = Math.max(0.7, 1 - (total - idx - 1) * 0.08);
@@ -108,10 +79,15 @@ chatForm.addEventListener("submit", async (e) => {
     const apiKey = typeof OPENAI_API_KEY !== "undefined" ? OPENAI_API_KEY : "";
 
     // Prepare messages for API (system prompt first, then conversation)
-    // Remove loading bubbles ("…") from API messages
+    // Remove loading bubbles ("…") and the initial assistant greeting from API messages
     const apiMessages = [
       { role: "system", content: SYSTEM_PROMPT },
-      ...messages.filter((m) => m.role !== "system" && m.content !== "…"),
+      ...messages.filter((m, i) =>
+        m.role !== "system" &&
+        m.content !== "…" &&
+        // skip the initial assistant greeting bubble
+        !(m.role === "assistant" && m.content === "👋 Hello! How can I help you today?" && i === 1)
+      ),
     ];
 
     // If we know the user's name, add a note for the assistant
